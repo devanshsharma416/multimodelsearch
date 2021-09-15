@@ -73,3 +73,9 @@ class TutorialSerializer(serializers.Serializer):
 
 
 
+class TimelineSerializer(serializers.Serializer):
+    
+    # articles = ArticleSerializer(many=True) 
+    article = ArticleSerializer(many=True)
+    lesson = LessonSerializer(many=True)
+    tutorial = LessonSerializer(many=True)

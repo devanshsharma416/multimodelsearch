@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import index
+from .views import index, hello
 app_name = 'MultiSearch'
 urlpatterns = [
-    path('', index, name= 'index.html')
+    path('myview/', index, name= 'index'),
+    path('hello/', hello)
 ]
