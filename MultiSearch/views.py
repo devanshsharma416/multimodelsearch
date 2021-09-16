@@ -115,20 +115,50 @@ from collections import namedtuple
 @api_view(['GET'])
 def index(request):
  
-    query=request.GET.get('query', None)
+    # query=request.GET.get('query', None)
+    query = "python"
     if query is not None:
         # Getting data from Queries
-            article_data = Article.objects.filter(Q(title__icontains = query)).distinct()
-            lesson_data = Lesson.objects.filter(Q(description__icontains = query)).distinct()
-            tutorial_data = Tutorial.objects.filter(Q(slug__icontains = query)).distinct()
+            article_data = (Article.objects.filter(title__icontains = query) | Article.objects.filter(description__icontains = query)).distinct()
+            print(article_data)
+            
+            lesson_data = (Lesson.objects.filter(description__icontains = query) | Lesson.objects.filter(slug__icontains = query)).distinct()
+            print(lesson_data)
+            
+            tutorial_data = (Tutorial.objects.filter(slug__icontains = query) | Tutorial.objects.filter(title__icontains = query)).distinct()
+            print(tutorial_data)
+            
+            serializer_article = ArticleSerializer(article_data, many=True)
+            serializer_lesson = LessonSerializer(lesson_data, many = True)
+            serializer_tutorial = TutorialSerializer(tutorial_data, many=True)
+            
+            print(serializer_tutorial.data)
 
             if not article_data.exists() and not(lesson_data.exists()) and not(tutorial_data):
                 message = {"message": "Enter the valid value"}
                 return Response(message)
+        
+            # else:
+            #     print("Hello")
+            #     if article_data.exists(): 
+            #         print("hello") 
+            #         return Response(serializer_article.data)
+            #     elif lesson_data.exists():  
+            #         print("hii")
+            #         return Response(serializer_lesson.data)
+            #     else: 
+            #         return Response(serializer_tutorial.data)
 
-            (Article.objects.filter(title__icontains = query) | Article.objects.filter(description__icontains = query)).distinct()
-    
-    
+            if len(article_data) != 0:
+                return Response(serializer_article.data)
+            elif len(lesson_data) != 0:
+                return Response(serializer_lesson.data)    
+            elif len(tutorial_data) !=0 :
+                return Response(serializer_tutorial.data)
+
+            return Response({"message": "badiya"})
+                
+            
     
     else:
         article_data = Article.objects.all()
