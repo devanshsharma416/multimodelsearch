@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Article, Lesson, Tutorial
-from rest_framework.settings import api_settings
+
 
 """Creating Class Based Serializers"""
 

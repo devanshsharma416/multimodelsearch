@@ -163,21 +163,24 @@ class IndexView(APIView):
         query = request.GET.get('query')
         if query is not None:
             
+            """Creating Queryset for desired data"""
             article_data = (Article.objects.filter(Q(title__icontains = query) | Q (description__icontains = query)).distinct()).order_by("title")
-            lesson_data = (Lesson.objects.filter(Q(description__icontains = query) | Q(slug__icontains = query)).distinct()).order_by("slug")
+            lesson_data = (Lesson.objects.filter(Q(description__icontains = query) | Q(slug__icontains = query)).distinct()).order_by("description")
             tutorial_data = (Tutorial.objects.filter(Q(slug__icontains = query) | Q(title__icontains = query)).distinct()).order_by("title")
             
+            """Serializing the Queryset"""
             serializer_article = ArticleSerializer(article_data, many=True)
             serializer_lesson = LessonSerializer(lesson_data, many = True)
             serializer_tutorial = TutorialSerializer(tutorial_data, many=True)
 
+            """Check if data is not existed"""
             if not article_data.exists() and not(lesson_data.exists()) and not(tutorial_data.exists()):
                 
-                message = {"message": "Enter the valid value"}
                 return Response({"article":article_data, 
                                  "lesson" :lesson_data,
-                                 "tutorial": tutorial_data})
-
+                                 "tutorial": tutorial_data}, status=status.HTTP_201_CREATED)
+            
+            # If existed then return the values
             else:
                 if len(article_data) != 0:
                     return Response(serializer_article.data)
@@ -201,7 +204,7 @@ class IndexView(APIView):
             
             return Response({
                 'article':article, 'lesson': lesson,  'tutorial': tutorial
-             })
+             }, status=status.HTTP_201_CREATED)
                 
 
 
