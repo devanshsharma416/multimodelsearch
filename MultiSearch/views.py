@@ -161,50 +161,29 @@ class IndexView(APIView):
 
     def get(self, request, format = None):
         query = request.GET.get('query')
+
+        article_data = Article.objects.all()
+        lesson_data = Lesson.objects.all()
+        tutorial_data = Tutorial.objects.all()
+
         if query is not None:
             
             """Creating Queryset for desired data"""
-            article_data = (Article.objects.filter(Q(title__icontains = query) | Q (description__icontains = query)).distinct()).order_by("title")
-            lesson_data = (Lesson.objects.filter(Q(description__icontains = query) | Q(slug__icontains = query)).distinct()).order_by("description")
-            tutorial_data = (Tutorial.objects.filter(Q(slug__icontains = query) | Q(title__icontains = query)).distinct()).order_by("title")
+            article_data = article_data.filter(Q(title__icontains = query) | Q (description__icontains = query)).distinct()
+            lesson_data = lesson_data.filter(Q(description__icontains = query) | Q(slug__icontains = query)).distinct()
+            tutorial_data = tutorial_data.filter(Q(slug__icontains = query) | Q(title__icontains = query)).distinct()
             
-            """Serializing the Queryset"""
-            serializer_article = ArticleSerializer(article_data, many=True)
-            serializer_lesson = LessonSerializer(lesson_data, many = True)
-            serializer_tutorial = TutorialSerializer(tutorial_data, many=True)
+        """Serializing the Queryset"""
+        serializer_article = ArticleSerializer(article_data, many=True)
+        serializer_lesson = LessonSerializer(lesson_data, many = True)
+        serializer_tutorial = TutorialSerializer(tutorial_data, many=True)
 
-            """Check if data is not existed"""
-            if not article_data.exists() and not(lesson_data.exists()) and not(tutorial_data.exists()):
-                
-                return Response({"article":article_data, 
-                                 "lesson" :lesson_data,
-                                 "tutorial": tutorial_data}, status=status.HTTP_201_CREATED)
+        """Check if data is not existed"""
+        # if not article_data.exists() and not(lesson_data.exists()) and not(tutorial_data.exists()):
             
-            # If existed then return the values
-            else:
-                if len(article_data) != 0:
-                    return Response(serializer_article.data)
-                elif len(lesson_data) != 0:
-                    return Response(serializer_lesson.data)    
-                elif len(tutorial_data) !=0 :
-                    return Response(serializer_tutorial.data)
-
-        else:
-            article_data = Article.objects.all()
-            lesson_data = Lesson.objects.all()
-            tutorial_data = Tutorial.objects.all()
-            
-            serializer_article = ArticleSerializer(article_data, many=True)
-            serializer_lesson = LessonSerializer(lesson_data, many = True)
-            serializer_tutorial = TutorialSerializer(tutorial_data, many=True)
-            
-            article = serializer_article.data
-            tutorial = serializer_tutorial.data
-            lesson = serializer_lesson.data
-            
-            return Response({
-                'article':article, 'lesson': lesson,  'tutorial': tutorial
-             }, status=status.HTTP_201_CREATED)
+        return Response({"article":serializer_article.data, 
+                            "lesson" :serializer_lesson.data,
+                            "tutorial": serializer_tutorial.data}, status=200)
                 
 
 
