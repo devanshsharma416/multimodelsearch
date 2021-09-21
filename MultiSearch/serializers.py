@@ -1,8 +1,22 @@
 from rest_framework import serializers
-from .models import Article, Lesson, Tutorial
+from .models import Article, Lesson, Tutorial, Book, Chapter
 
 
 """Creating Class Based Serializers"""
+
+# class ArticleDocumentSerializer(DocumentSerializer):
+#     class Meta:
+#         model = Article
+#         document = ArticleDocument
+
+#         fields = ('title', 'description', 'slug', 'publish_date')
+
+#         def get_location(self, obj):
+#             try:
+#                 return obj.location_to_dict()
+#             except:
+#                 return {}
+
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,6 +33,17 @@ class LessonSerializer(serializers.ModelSerializer):
 class TutorialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tutorial
+        fields = "__all__"
+
+
+class ChapterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chapter
+        fields = "__all__"
+
+class BookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
         fields = "__all__"
 
 

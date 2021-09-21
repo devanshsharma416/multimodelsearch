@@ -17,8 +17,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+# from MultiSearch.views import ArticleDocumentView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # path('search/', ArticleDocumentView.as_view({'get': 'list'})),
     path('', include('MultiSearch.urls', namespace='MultiSearch'))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
