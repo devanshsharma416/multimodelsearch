@@ -147,3 +147,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TIME_ZONE = 'Asia/Kolkata'
+
+AUTH_USER_MODEL = 'MultiSearch.NewUser'
+
+USER_DETAILS_SERIALIZER = 'MultiSearch.NewUser'

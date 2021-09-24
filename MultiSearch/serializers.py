@@ -1,27 +1,18 @@
 from rest_framework import serializers
-from .models import Article, Lesson, Tutorial, Book, Chapter
+from .models import Article, Lesson, NewUser, Tutorial, Book, Chapter
 
 
 """Creating Class Based Serializers"""
-
-# class ArticleDocumentSerializer(DocumentSerializer):
-#     class Meta:
-#         model = Article
-#         document = ArticleDocument
-
-#         fields = ('title', 'description', 'slug', 'publish_date')
-
-#         def get_location(self, obj):
-#             try:
-#                 return obj.location_to_dict()
-#             except:
-#                 return {}
+class NewUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewUser
+        fields = ('first_name', 'last_name', 'username', 'date_joined')
 
 
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = "__all__"
+        fields = ('title', 'description', 'slug', 'user', 'summary')
 
 
 class LessonSerializer(serializers.ModelSerializer):

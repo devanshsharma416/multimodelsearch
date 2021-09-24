@@ -1,12 +1,26 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
+
+class NewUser(AbstractUser):
+    first_name = models.CharField(max_length=20)
+    last_name = models.CharField(max_length=20)
+
+    class Meta:
+        
+        verbose_name = 'NewUser'
+        verbose_name_plural = 'NewUsers'
+
+    def __str__(self):
+        return self.username
 
 class Article(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(null=True, blank = True)
     slug = models.SlugField(blank=True, null= True)
-    publish_date  = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
+    summary = models.CharField(max_length=200, null=True, blank= True)
 
     class Meta:
         
@@ -20,8 +34,9 @@ class Lesson(models.Model):
     title = models.CharField(max_length=120)
     description = models.TextField(null=True, blank=True)
     slug     = models.SlugField(blank=True, unique=True)
-    featured  = models.BooleanField(default=False)
-    publish_date  = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
+    summary = models.CharField(max_length=200, null=True, blank= True)
+    
 
     class Meta:
     
@@ -37,8 +52,8 @@ class Tutorial(models.Model):
     description = models.TextField(null=True, blank=True)
     slug     = models.SlugField(blank=True, unique=True)
     author = models.CharField(max_length=20)
-    featured  = models.BooleanField(default=False)
-    publish_date  = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
+    
 
     class Meta:
         
@@ -55,7 +70,7 @@ class Chapter(models.Model):
     description = models.TextField(null=True, blank=True)
     slug     = models.SlugField(blank=True, unique=True)
     author = models.CharField(max_length=20)
-    published = models.BooleanField(default=False)
+    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         
@@ -70,7 +85,7 @@ class Book(models.Model):
     description = models.TextField(null=True, blank=True)
     isbn = models.CharField(max_length=20)
     author = models.CharField(max_length=20)
-    published = models.BooleanField(default=False)
+    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         
@@ -78,7 +93,7 @@ class Book(models.Model):
         verbose_name_plural = 'Books'
 
 
-    def __str__(self):
+    def __str__(self): 
         return self.title
 
 

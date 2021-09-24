@@ -1,9 +1,14 @@
 from django.contrib import admin
-from .models import (Article, 
+from .models import (NewUser,
+                    Article, 
                     Lesson, 
                     Tutorial,
                     Chapter,
                     Book)
+
+@admin.register(NewUser)
+class AuthorAdmin(admin.ModelAdmin):
+   pass
 
 @admin.register(Article)
 class AuthorAdmin(admin.ModelAdmin):
@@ -24,4 +29,4 @@ class AuthorAdmin(admin.ModelAdmin):
 @admin.register(Book)
 class AuthorAdmin(admin.ModelAdmin):
    pass
-# Register your models here.
+

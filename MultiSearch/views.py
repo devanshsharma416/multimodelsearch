@@ -1,50 +1,35 @@
-from django.db.models.query_utils import FilteredRelation
+from django.db.models import query
 from MultiSearch.serializers import (ArticleSerializer, 
-        LessonSerializer, 
+        LessonSerializer, NewUserSerializer, 
         TutorialSerializer, 
         ChapterSerializer, 
         BookSerializer)
-from django.db import models
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Article, Chapter, Lesson, Tutorial, Book
+from .models import Article, Chapter, Lesson, Tutorial, Book, NewUser
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .filters import ArticleFilter, LessonFilter, TutorialFilter
 from itertools import chain
+from django.db.models import Q
+from drf_multiple_model.views import ObjectMultipleModelAPIView
 
-
-# class ArticleDocumentView(DocumentViewSet):
-#     document = ArticleDocument
-#     serializer_class = ArticleDocumentSerializer
-
-#     # filter_backends = [
-#     #     FilteringFilterBackend, 
-#     #     CompoundSearchFilterBackend
-#     # ]        
-
-#     search_fields = ('title', 'description')
-#     multi_match_search_fields = ('title', 'description')
-#     filter_fields = {
-#         'title' : 'title',
-#         'description' : 'description'
-# #     }
+'''Creating class based API VIew'''
 class IndexView(APIView):
-    
-
     """Create get method to perform get request""" 
     
     def get(self, request, format = None):
         
+        # Getting query request
         query = request.GET.get('query')
        
+        # declaring variable to remove the unbound error
         article_final_data = []
         lesson_final_data = []
         tutorial_final_data = []
         chapter_final_data = []
         book_final_data = []
 
+        # Getting all the data from the Models
         article_data = Article.objects.all()
         lesson_data = Lesson.objects.all()
         tutorial_data = Tutorial.objects.all()
@@ -56,25 +41,36 @@ class IndexView(APIView):
             
             """Creating Queryset for desired data"""
             article_data1 = article_data.filter(title__icontains = query)
+            # We have used the exlude the duplicacy from the queryset
             article_data2 = article_data.filter(description__icontains = query).exclude(title__icontains = query)
-            article_final_data  = list(chain(article_data1, article_data2))
-            print(article_final_data)
+            article_data3 = article_data.filter(slug__icontains = query).exclude(Q(title__icontains = query) | Q(description__icontains = query))
+            article_data4 = article_data.filter(Q(user__first_name__icontains = query) | Q(user__last_name__icontains = query)).exclude(Q(title__icontains = query) | Q(description__icontains = query) | Q(slug__icontains = query))
+            article_final_data  = list(chain(article_data1, article_data2, article_data3, article_data4))
+            
              
-            lesson_data1 = lesson_data.filter(description__icontains = query)
-            lesson_data2 = lesson_data.filter(slug__icontains = query).exclude(description__icontains =query)
-            lesson_final_data = list(chain(lesson_data1, lesson_data2))
+            lesson_data2 = lesson_data.filter(description__icontains = query)
+            lesson_data3 = lesson_data.filter(slug__icontains = query).exclude(description__icontains =query)
+            lesson_data4 = lesson_data.filter(summary__icontains = query).exclude(Q(description__icontains = query) | Q(slug__icontains = query))
+            lesson_data5 = lesson_data.filter(Q(user__first_name__icontains = query) | Q(user__last_name__icontains = query)).exclude((Q(description__icontains = query) | Q(slug__icontains = query) | Q(summary__icontains = query)))
+            lesson_final_data = list(chain(lesson_data2, lesson_data3, lesson_data4, lesson_data5))
 
-            tutorial_data1 = tutorial_data.filter(slug__icontains = query)
-            tutorial_data2 = tutorial_data.filter(title__icontains = query).exclude(slug__icontains =query)
-            tutorial_final_data = list(chain(tutorial_data1, tutorial_data2))
+            tutorial_data3 = tutorial_data.filter(slug__icontains = query)
+            tutorial_data4 = tutorial_data.filter(author__icontains = query).exclude(slug__icontains =query)
+            tutorial_data5 = tutorial_data.filter(Q(user__first_name__icontains = query) | Q(user__last_name__icontains = query)).exclude(Q(slug__icontains = query) | Q(author__icontains = query))
+            tutorial_data1 = tutorial_data.filter(title__icontains = query).exclude(Q(slug__icontains = query) | Q(author__icontains = query))
+            tutorial_final_data = list(chain(tutorial_data3, tutorial_data4, tutorial_data5, tutorial_data1))
 
-            chapter_data1 = chapter_data.filter(description__icontains = query)
-            chapter_data2 = chapter_data.filter(author__icontains = query).exclude(description__icontains =query)
-            chapter_final_data = list(chain(chapter_data1, chapter_data2))
-
+            chapter_data4 = chapter_data.filter(author__icontains = query)
+            chapter_data5 = tutorial_data.filter(Q(user__first_name__icontains = query) | Q(user__last_name__icontains = query))
+            chapter_data1 = chapter_data.filter(title__icontains = query).exclude(author__icontains = query)
+            chapter_data2 = chapter_data.filter(description__icontains = query).exclude(Q(author__icontains =query) | Q(title__icontains =query))
+            chapter_final_data = list(chain(chapter_data4, chapter_data5, chapter_data1, chapter_data2))
+            
+            book_data5 = book_data.filter(Q(user__first_name__icontains = query) | Q(user__last_name__icontains = query))
             book_data1 = book_data.filter(title__icontains = query)
-            book_data2 = book_data.filter(author__icontains = query).exclude(title__icontains =query)
-            book_final_data = list(chain(book_data1, book_data2))
+            book_data2 = book_data.filter(description__icontains = query).exclude(title__icontains =query)
+            book_data3 = book_data.filter(isbn__icontains = query).exclude(Q(description__icontains =query) | Q(title__icontains = query))
+            book_final_data = list(chain(book_data5, book_data1, book_data2, book_data3))
 
 
         """Serializing the Queryset"""
@@ -84,101 +80,98 @@ class IndexView(APIView):
         serializer_chapter = ChapterSerializer(chapter_final_data, many = True)
         serializer_book = BookSerializer(book_final_data, many = True)   
         
+        # Returning the serializers
         return Response({"Article":serializer_article.data,
                                 "Lesson" :serializer_lesson.data,
                                 "Tutorial": serializer_tutorial.data,
                                 "Chapter": serializer_chapter.data,
                                 "Book": serializer_book.data}, status=200)
-                
 
+@api_view(['GET'])   
+def get_user(request):
+    query = request.GET.get('query')
 
+    if query is not None:
+        queryset = NewUser.objects.all()
 
-# class IndexView(APIView):
-    
-#     def get(self, request, format = None):
+        search_queryset1 = queryset.filter(first_name__icontains = query)
+        search_queryset2 = queryset.filter(last_name__icontains = query)
+        new_queryset= list(chain(search_queryset1, search_queryset2))
         
-        
-#         query = request.GET.get('query', None)
-        
-#         if query is not None:
+    final_queryset = NewUserSerializer(new_queryset, many = True)
+    print(final_queryset)
+    return Response({"User":final_queryset.data})
+ 
 
-#             queryset1 = Article.objects.filter(Q(title__icontains = query) | (Q(description__icontains = query)))
-#             queryset2 = Lesson.objects.filter(Q(title__icontains = query) | (Q(description__icontains = query)))
-#             queryset3 = Tutorial.objects.filter(Q(title__icontains = query) | (Q(description__icontains = query)))
+# def my_filter_fn(queryset, request):
+#     query = request.GET.get('query', None)
+#     if query is not None:
+#         article_data1 = Article.objects.filter(title__icontains = query)           
+#         article_data2 = Article.objects.filter(description__icontains = query).exclude(title__icontains = query)       
+#         queryset  = article_data1.union(article_data2)
 
-#             filterset1 = ArticleFilter(request.GET, queryset = queryset1)
-#             filterset2 = LessonFilter(request.GET, queryset = queryset2)
-#             filterset3 = LessonFilter(request.GET, queryset = queryset3)
-        
-#             # Making Queryset as a 
-#             new_queryset1 = filterset1.qs
-#             new_queryset2 = filterset2.qs
-#             new_queryset3 = filterset3.qs
-            
-#         serializer_article = ArticleSerializer(new_queryset1, many=True)
-#         serializer_lesson = LessonSerializer(new_queryset2, many=True)
-#         serializer_tutorial = TutorialSerializer(new_queryset3, many = True)
-        
-#         return Response({'Article': serializer_article.data, 'Lesson': serializer_lesson.data, 'Tutorial': serializer_tutorial.data})
-
-        
-       
-
-# # #         if filterset.is_valid():
-# # #             queryset = filterset.qs
-# # #             serializer_lesson = LessonSerializer(queryset, many=True)
-# # #             return Response(serializer_lesson.data)
+#     return queryset
 
 
+# def my_filter_fn1(queryset, request):
+#     query = request.GET.get('query', None)
+#     if query is not None:
+#         lesson_data1 = Lesson.objects.filter(description__icontains = query)           
+#         lesson_data2 = Lesson.objects.filter(slug__icontains = query).exclude(description__icontains = query)       
+#         queryset  = lesson_data1.union(lesson_data2)
 
+#     return queryset
 
+# def my_filter_fn2(queryset, request):
+#     query = request.GET.get('query', None)
+#     if query is not None:
+#         tutorial_data1 = Tutorial.objects.filter(slug__icontains = query)           
+#         tutorial_data2 = Tutorial.objects.filter(title__icontains = query).exclude(title__icontains = query)       
+#         queryset  = tutorial_data1.union(tutorial_data2)
 
+#     return queryset
 
+# def my_filter_fn3(queryset, request):
+#     query = request.GET.get('query', None)
+#     if query is not None:
+#         chapter_data1 = Chapter.objects.filter(description__icontains = query)           
+#         chapter_data2 = Chapter.objects.filter(author__icontains = query).exclude(description__icontains = query)       
+#         queryset  = chapter_data1.union(chapter_data2)
 
+#     return queryset
 
+# def my_filter_fn4(queryset, request):
+#     query = request.GET.get('query', None)
+#     if query is not None:
+#         book_data1 = Book.objects.filter(title__icontains = query)           
+#         book_data2 = Book.objects.filter(author__icontains = query).exclude(title__icontains = query)       
+#         queryset  = book_data1.union(book_data2)
+#     return queryset
 
+# class IndexView(ObjectMultipleModelAPIView):
+#     querylist = [
+#         {'queryset': Article.objects.all(), 'serializer_class': ArticleSerializer, 'filter_fn': my_filter_fn},
+#         {'queryset': Lesson.objects.all(), 'serializer_class':LessonSerializer, 'filter_fn': my_filter_fn1},
+#         {'queryset': Tutorial.objects.all(), 'serializer_class':TutorialSerializer, 'filter_fn': my_filter_fn2},
+#         {'queryset': Chapter.objects.all(), 'serializer_class': ChapterSerializer, 'filter_fn': my_filter_fn3},
+#         {'queryset': Book.objects.all(), 'serializer_class': BookSerializer, 'filter_fn': my_filter_fn4}
 
+#         ]
 
-
-
-
-
-
-# Getting data from Queries
-#         article_data = Article.objects.filter(Q(title__icontains = query) & Q(description__icontains = query)).distinct()
-#         lesson_data = Lesson.objects.filter(Q(description__icontains = query) & Q(slug__icontains = query)).distinct()
-#         tutorial_data = Tutorial.objects.filter(Q(slug__icontains = query) & Q(title__icontains = query)).distinct()
-
-#         if not article_data.exists():
-#             article_data = Article.objects.all()
-            
-#         if not lesson_data.exists():
-#             lesson_data = Lesson.objects.all()
-            
-#         if not tutorial_data.exists():
-#             tutorial_data = Tutorial.objects.all()  
-
-#             # Serialing the data 
-#         serializer_article = ArticleSerializer(article_data, many=True)
-#         serializer_lesson = LessonSerializer(lesson_data, many = True)
-#         serializer_tutorial = LessonSerializer(tutorial_data, many = True)
-        
    
-
-#             # # Merging the queries the data
-#             # article_value = article_data
-#             # tutorial_value = tutorial_data
-#             # lesson_value = lesson_data
-#             # # data = (article_value,tutorial_value, lesson_value)
-            
-#             # Combining all the data
-#             combined_data = namedtuple('Combineddata', ('article','tutorial', 'lesson'))
-#             Mydata = combined_data(article=article_value, tutorial=tutorial_value, lesson=lesson_value)
-#             serializer_dt=TimelineSerializer(Mydata)
-#             print(serializer_dt.data)
-
-           
-#             return Response(data = serializer_dt.data)
-            
-#     else:
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
