@@ -4,9 +4,6 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 class NewUser(AbstractUser):
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
-
     class Meta:
         
         verbose_name = 'NewUser'
@@ -16,11 +13,11 @@ class NewUser(AbstractUser):
         return self.username
 
 class Article(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField(null=True, blank = True)
-    slug = models.SlugField(blank=True, null= True)
-    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
-    summary = models.CharField(max_length=200, null=True, blank= True)
+    title          = models.CharField(max_length=100)
+    description    = models.TextField(null=True, blank = True)
+    slug           = models.SlugField(blank=True, null= True)
+    user           = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
+    summary        = models.CharField(max_length=200, null=True, blank= True)
 
     class Meta:
         
@@ -31,11 +28,11 @@ class Article(models.Model):
         return self.title
 
 class Lesson(models.Model):
-    title = models.CharField(max_length=120)
-    description = models.TextField(null=True, blank=True)
-    slug     = models.SlugField(blank=True, unique=True)
-    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
-    summary = models.CharField(max_length=200, null=True, blank= True)
+    title          = models.CharField(max_length=120)
+    description    = models.TextField(null=True, blank=True)
+    slug           = models.SlugField(blank=True, unique=True)
+    user           = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
+    summary        = models.CharField(max_length=200, null=True, blank= True)
     
 
     class Meta:
@@ -48,11 +45,11 @@ class Lesson(models.Model):
         return self.title
 
 class Tutorial(models.Model):
-    title = models.CharField(max_length=120)
-    description = models.TextField(null=True, blank=True)
-    slug     = models.SlugField(blank=True, unique=True)
-    author = models.CharField(max_length=20)
-    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
+    title           = models.CharField(max_length=120)
+    description     = models.TextField(null=True, blank=True)
+    slug            = models.SlugField(blank=True, unique=True)
+    author          = models.CharField(max_length=20)
+    user            = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
     
 
     class Meta:
@@ -66,11 +63,11 @@ class Tutorial(models.Model):
 
 
 class Chapter(models.Model):
-    title = models.CharField(max_length=120)
-    description = models.TextField(null=True, blank=True)
-    slug     = models.SlugField(blank=True, unique=True)
-    author = models.CharField(max_length=20)
-    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
+    title       =     models.CharField(max_length=120)
+    description =     models.TextField(null=True, blank=True)
+    slug        =     models.SlugField(blank=True, unique=True)
+    author      =     models.CharField(max_length=20)
+    user        =     models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         
@@ -81,11 +78,11 @@ class Chapter(models.Model):
         return self.title
 
 class Book(models.Model):
-    title = models.CharField(max_length=120)
-    description = models.TextField(null=True, blank=True)
-    isbn = models.CharField(max_length=20)
-    author = models.CharField(max_length=20)
-    user = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
+    title           = models.CharField(max_length=120)
+    description     = models.TextField(null=True, blank=True)
+    isbn            = models.CharField(max_length=20)
+    author          = models.CharField(max_length=20)
+    user            = models.ForeignKey(NewUser, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         

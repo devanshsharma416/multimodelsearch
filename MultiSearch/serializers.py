@@ -12,8 +12,7 @@ class NewUserSerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ('title', 'description', 'slug', 'user', 'summary')
-
+        fields = "__all__"
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
